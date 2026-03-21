@@ -1,0 +1,1 @@
+#Virtual column implementation
