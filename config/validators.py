@@ -1,4 +1,4 @@
-from config.exceptions import NewColumnLabelError, OperationError, ColumnsLabelError, ColumnNotFoundError
+from config.exceptions import NewColumnLabelError, OperationError, ColumnsLabelError, ColumnNotFoundError, RoleStringError
 import pandas as pd
 
 """
@@ -21,7 +21,7 @@ def validate_new_column_label(new_column_label : str) -> None:
         NewColumnLabelError: If the label contains invalid characters.
     """
     if not new_column_label.replace("_", "").isalpha():
-        raise NewColumnLabelError(new_column_label)
+        raise NewColumnLabelError(f"Invalid new column label: '{new_column_label}'.")
 
 def validate_operation(operations : list) -> None:
     """Validate the list of operations.
@@ -34,7 +34,7 @@ def validate_operation(operations : list) -> None:
     """
     for operation in operations:
         if not operation in ['+', '-', '*']:
-            raise OperationError(operation)
+            raise OperationError(f"Unsupported operation: '{operation}'.")
         
 def validate_column_labels(column_labels : list) -> None:
     """Validate existing column labels.
@@ -47,7 +47,7 @@ def validate_column_labels(column_labels : list) -> None:
     """
     for  label in column_labels:
         if not label.replace("_", "").isalpha():
-            raise ColumnsLabelError(label)
+            raise ColumnsLabelError(f"Invalid input column label: '{label}'.")
         
 def validate_columns_exist(df : pd.DataFrame, column_labels : list) -> None:
     """Check that all specified columns exist in the DataFrame.
@@ -62,5 +62,16 @@ def validate_columns_exist(df : pd.DataFrame, column_labels : list) -> None:
     df_names = df.columns.values.tolist()
     for label in column_labels:
         if not label in df_names:
-            raise ColumnNotFoundError(label)
-    
+            raise ColumnNotFoundError(f"Column not found: '{label}'.")
+
+def validate_role_is_not_empty(columns: list) -> None:
+    """Check if the role string actually contains column names.
+
+    Args:
+        columns: List of columns extracted from the role.
+
+    Raises:
+        VirtualColumnError: If no columns were found.
+    """
+    if not columns or (len(columns) == 1 and not columns[0]):
+        raise RoleStringError("The role expression is empty or invalid.")
