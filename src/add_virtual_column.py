@@ -1,35 +1,30 @@
 import pandas as pd
-from operators import operations as op
+import re
+from config.exceptions import VirtualColumnError
+from config import validators as val
 
 def add_virtual_column(df: pd.DataFrame, role: str, new_column: str) -> pd.DataFrame:
-    role_list = role.split()
-    columns = [role_list[i] for i in range(0, len(role_list), 2)]
-    operations = [role_list[i] for i in range(1, len(role_list), 2)]
-    df_result = df.copy()
+    role_clean = role.replace(" ", "")
+    role_list = re.split(r'([+\-*])', role_clean)    
+    columns = [r for r in role_list[0::2] if r]
+    operations = role_list[1::2]
 
-    columns_final = columns.copy()
-    operations_final = []
+    try:
+        val.validate_role_is_not_empty(columns)
+        val.validate_columns_exist(df, columns)
+        val.validate_column_labels(columns)
+        val.validate_new_column_label(new_column)
+        val.validate_operation(operations)
 
-    for i in range(len(operations)):
-        if operations[i] == "*" :
-            df_result[f'tmp{i}'] = op[operations[i]](df_result[columns[i]], df_result[columns[i+1]])
-            idx = columns_final.index(columns[i])
-            cols_to_remove = [columns[i], columns[i+1]]     
-            for col in cols_to_remove:
-                if col in columns_final:
-                    columns_final.remove(col) 
-            columns_final.insert(idx, f'tmp{i}')
-        else :
-            operations_final.append(operations[i])
+        df_result = df.copy()
 
-    result = df_result[columns_final[0]]
+        df_result[new_column] = df_result.eval(role)
 
-    for i, operation in enumerate(operations_final):
-        result = op[operation](result, df_result[columns_final[i+1]])
+        return df_result
     
-    df_result[new_column] = result
+    except VirtualColumnError:
+        return pd.DataFrame()
     
-    return df_result.loc[:, df.columns.values.tolist() + [new_column]]
-
-
+    except Exception:
+        return pd.DataFrame()
 
