@@ -1,5 +1,5 @@
 import pandas as pd
-from src import add_virtual_column
+from src.add_virtual_column import add_virtual_column
 
 
 def test_sum_of_two_columns():
