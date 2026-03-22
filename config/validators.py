@@ -49,7 +49,7 @@ def validate_column_labels(column_labels : list) -> None:
         if not label.replace("_", "").isalpha():
             raise ColumnsLabelError(label)
         
-def validate_column_existence(df : pd.DataFrame, column_labels : list) -> None:
+def validate_columns_exist(df : pd.DataFrame, column_labels : list) -> None:
     """Check that all specified columns exist in the DataFrame.
 
     Args:
