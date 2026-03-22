@@ -1,4 +1,4 @@
-from config import NewColumnLabelError, OperationError, ColumnsLabelError, ColumnNotFoundError
+from config.exceptions import NewColumnLabelError, OperationError, ColumnsLabelError, ColumnNotFoundError
 import pandas as pd
 
 """
